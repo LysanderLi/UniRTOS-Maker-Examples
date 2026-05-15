@@ -13,6 +13,8 @@
 #include "qosa_log.h"
 #include "qosa_gpio.h"
 #include "test_demo.h"
+#include "qosa_pinctrl.h"
+#include "unirtos_app_init_registry.h"
 
 /*===========================================================================
  *  Macro Definition
@@ -50,14 +52,6 @@ static void unir_uart_callback(qosa_uart_cb_param_t *cb_param)
     {
         qosa_uart_write(port, (unsigned char *)data, sizeof(data));
     }
-    else if (event_id & QOSA_UART_EVENT_TX_COMPLETE)
-    {
-        qosa_uart_write(port, (unsigned char *)data, sizeof(data));
-    }
-    else if (event_id & QOSA_UART_EVENT_TX_LOW)
-    {
-        qosa_uart_write(port, (unsigned char *)data, sizeof(data));
-    }
 }
 
 /**
@@ -73,7 +67,7 @@ static void unir_uart_demo_process(void *ctx)
 
     qosa_uart_status_monitor_t monitor = {0};
     monitor.callback = unir_uart_callback; /* Register callback function */
-    monitor.event_mask = QOSA_UART_EVENT_RX_INDICATE | QOSA_UART_EVENT_TX_COMPLETE;
+    monitor.event_mask = QOSA_UART_EVENT_RX_INDICATE;
     monitor.user_data = "Hello, Uart!";
 
     /* Register UART event callback */
@@ -127,3 +121,4 @@ void unir_test_demo_init(void)
         );
     }
 }
+UNIRTOS_APP_EXPORT(700, "unir_uart_test_demo", unir_test_demo_init);

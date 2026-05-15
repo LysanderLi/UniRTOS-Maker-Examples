@@ -1,5 +1,5 @@
 /*****************************************************************/ /**
-* @file qcm_socket_block_demo.c
+* @file socket_block_demo.c
 * @brief
 * @author harry.li@quectel.com
 * @date 2025-05-7
@@ -16,10 +16,10 @@
 #include "qosa_def.h"
 #include "qosa_sys.h"
 #include "qosa_log.h"
-#include "qcm_socket_adp.h"
 #include "qosa_asyn_dns.h"
 
 #include "qosa_datacall.h"
+#include "unirtos_app_init_registry.h"
 
 #define QOS_LOG_TAG                       LOG_TAG
 
@@ -27,7 +27,7 @@
 #define SOCKET_BLOCK_DEMO_TASK_PRIO       QOSA_PRIORITY_NORMAL
 
 #define SOCKET_BLOCK_CONNECT_SERVER_ADDR  "101.37.104.185"
-#define SOCKET_BLOCK_CONNECT_SERVER_PORT  46329
+#define SOCKET_BLOCK_CONNECT_SERVER_PORT  46285
 #define SOCKET_BLOCK_CONNECT_SERVER_NAME  "101.37.104.185"
 #define SOCKET_BLOCK_BUFF_MAX_LEN         1024
 
@@ -46,7 +46,7 @@
  * @retval 0  Successfully activated data connection or connection is already active
  * @retval -1 Failed to activate data connection
  */
-static int qcm_socket_app_datacall_active(void)
+static int socket_app_datacall_active(void)
 {
     /* Define data connection related variables */
     qosa_datacall_conn_t    conn = 0;
@@ -73,6 +73,116 @@ static int qcm_socket_app_datacall_active(void)
 }
 
 /**
+ * @brief Get IP address corresponding to hostname through DNS resolution
+ *
+ * @param hostname Pointer to the hostname string to resolve
+ * @param ip Pointer to character array for storing the resolved IP address
+ * @param ip_len Length of ip buffer
+ * @return 0 on success, -1 on failure
+ */
+static int socket_app_block_dns(char *hostname, char *ip, qosa_uint32_t ip_len)
+{
+    struct addrinfo     hints = {0};
+    struct addrinfo    *result = QOSA_NULL;
+    struct sockaddr_in *ipv4 = QOSA_NULL;
+    int                 status = 0;
+
+    QLOGI("hostname=%s", hostname);
+
+    hints.ai_family   = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    status = getaddrinfo(hostname, QOSA_NULL, &hints, &result);
+    if (status != 0)
+    {
+        QLOGE("dns err=%d", status);
+        return -1;
+    }
+
+    ipv4 = (struct sockaddr_in *)result->ai_addr;
+    inet_ntop(AF_INET, &(ipv4->sin_addr), ip, ip_len);
+    QLOGI("ip=%s", ip);
+    freeaddrinfo(result);
+    return 0;
+}
+
+/**
+ * @brief Configure custom socket IO read function
+ *
+ * @param socket_fd Socket file descriptor
+ * @param buf Starting address of buffer to receive data
+ * @param len Buffer length
+ * @return Returns actual read length on success, <=0 on error
+ */
+static int socket_app_block_read(int socket_fd, unsigned char *buf, qosa_size_t len)
+{
+    int ret = 0;
+
+    ret = read(socket_fd, buf, len);
+    QLOGI("ret=%d", ret);
+    if (ret <= 0)
+    {
+        QLOGE("read err");
+    }
+
+    return ret;
+}
+
+/**
+ * @brief Configure custom socket IO write function
+ *
+ * @param socket_fd Socket file descriptor
+ * @param buf Starting address of data content to be written
+ * @param len Data length
+ * @return Returns actual write length on success, <=0 on error
+ */
+static int socket_app_block_write(int socket_fd, unsigned char *buf, qosa_size_t len)
+{
+    int ret = 0;
+
+    ret = write(socket_fd, buf, len);
+    QLOGI("ret=%d", ret);
+    if (ret <= 0)
+    {
+        QLOGE("write err");
+    }
+
+    return ret;
+}
+
+/**
+ * @brief Create socket and connect, using blocking method to connect to target host
+ *
+ * @param remote_ip Target host IP address in dotted decimal format
+ * @param port Target host port
+ * @return Returns connected socket descriptor on success, -1 on failure
+ */
+static int socket_app_block_create(const char *remote_ip, qosa_uint16_t port)
+{
+    int                socket_fd = -1;
+    struct sockaddr_in server_addr = {0};
+
+    server_addr.sin_family      = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(remote_ip);
+    server_addr.sin_port        = htons(port);
+
+    socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+    if (socket_fd == -1)
+    {
+        QLOGE("socket create error");
+        return -1;
+    }
+
+    if (connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
+    {
+        close(socket_fd);
+        QLOGE("socket connect error");
+        return -1;
+    }
+
+    return socket_fd;
+}
+
+/**
  * @brief Blocking socket application processing function for executing TCP client communication flow.
  *
  * This function first waits for a period of time for network registration to complete, then activates data connection (such as PDP),
@@ -82,77 +192,46 @@ static int qcm_socket_app_datacall_active(void)
  * @param argv Unused parameter, reserved to comply with function pointer interface requirements.
  * @return No return value.
  */
-static void qcm_socket_app_block_process(void *argv)
+static void socket_app_block_process(void *argv)
 {
     QOSA_UNUSED(argv);
-    int                    sockfd = -1;
-    int                    ret = 0;
-    char                   buff[SOCKET_BLOCK_BUFF_MAX_LEN] = {0};
-    struct qosa_addrinfo_s hints, *rp, *result;
-    qosa_ip_addr_t         remote_ip = {0};
-
-    hints.ai_family = QCM_AF_INET;
+    int           socket_fd = -1;
+    int           ret = 0;
+    unsigned char buff[SOCKET_BLOCK_BUFF_MAX_LEN] = {0};
+    char          remote_ip[INET_ADDRSTRLEN] = {0};  // Used to store remote server IP address
 
     // Wait for a period of time before starting demo, convenient for network registration and log capture
     qosa_task_sleep_sec(10);
 
     // Activate data connection (such as PDP), exit if failed
-    if (qcm_socket_app_datacall_active() != 0)
+    if (socket_app_datacall_active() != 0)
     {
         QLOGE("[TEST DEMO]pdp error");
         return;
     }
 
     // Perform DNS resolution to get server address information
-    if (qosa_dns_syn_getaddrinfo(SOCKET_BLOCK_DEMO_SIMID, SOCKET_BLOCK_DEMO_PDPID, SOCKET_BLOCK_CONNECT_SERVER_NAME, &hints, &result) != QOSA_DNS_RESULT_OK)
+    ret = socket_app_block_dns(SOCKET_BLOCK_CONNECT_SERVER_NAME, remote_ip, INET_ADDRSTRLEN);
+    if (ret != 0)
     {
-        QLOGE("[TEST DEMO]dns_syn_getaddrinfo error");
+        QLOGE("[TEST DEMO]dns error");
         return;
     }
     else
     {
         QLOGI("[TEST DEMO]dns_syn_getaddrinfo success");
 
-        // Traverse DNS returned address list, attempt to establish TCP connection
-        for (rp = result; rp != QOSA_NULL; rp = rp->ai_next)
+        // Create socket and connect to server
+        socket_fd = socket_app_block_create(remote_ip, SOCKET_BLOCK_CONNECT_SERVER_PORT);
+        if (socket_fd == -1)
         {
-            // Use qcm_socket_create to create blocking socket
-            sockfd = qcm_socket_create(0, 1, rp->ai_family, QCM_SOCK_STREAM, QCM_TCP_PROTOCOL, 0, QOSA_TRUE);
-            if (sockfd < 0)
-            {
-                QLOGE("qcm_socket_create error");
-                qosa_dns_result_free(result);
-                return;
-            }
-
-            qosa_memset(&remote_ip, 0, sizeof(qosa_ip_addr_t));
-            if (hints.ai_family == QCM_AF_INET)
-            {
-                // Handle IPv4 address
-                inet_pton(AF_INET, rp->ip_addr, &remote_ip.addr.ipv4_addr);
-                remote_ip.ip_vsn = QOSA_PDP_IPV4;
-            }
-            QLOGI("[TEST DEMO]ip--->%s port=%d", rp->ip_addr, SOCKET_BLOCK_CONNECT_SERVER_PORT);
-
-            // Use blocking method to establish TCP connection
-            ret = qcm_socket_connect(sockfd, &remote_ip, SOCKET_BLOCK_CONNECT_SERVER_PORT);
-            if (ret == 0)
-            {
-                QLOGD("[TEST DEMO]qcm_socket_connect success");
-                break;
-            }
-            else
-            {
-                qcm_socket_close(sockfd);
-                sockfd = -1;
-            }
+            QLOGE("[TEST DEMO]tcp connect error");
+            return;
         }
-
-        // Free DNS resolution result memory
-        qosa_dns_result_free(result);
+        QLOGI("[TEST DEMO]socket connect success!!");
     }
 
-    QLOGD("[TEST DEMO]sockfd=%d", sockfd);
+    QLOGI("[TEST DEMO]socket_fd=%d", socket_fd);
 
     // Send and receive data, execute up to 20 times
     while (1)
@@ -161,35 +240,36 @@ static void qcm_socket_app_block_process(void *argv)
         i++;
         if (i > 20)
         {
-            QLOGD("i = %d", i);
+            QLOGI("i = %d", i);
             break;
         }
 
         // Construct send buffer content
         qosa_memset(buff, i, SOCKET_BLOCK_BUFF_MAX_LEN);
-        qosa_snprintf(buff, SOCKET_BLOCK_BUFF_MAX_LEN, "%s,%d", "abcdefg:", i);
+        qosa_snprintf((char *)buff, SOCKET_BLOCK_BUFF_MAX_LEN, "%s,%d", "abcdefg:", i);
 
         // Send data
-        ret = qcm_socket_send(sockfd, buff, qosa_strlen(buff));
+        ret = socket_app_block_write(socket_fd, buff, qosa_strlen((const char *)buff));
         if (ret <= 0)
         {
-            QLOGE("[TEST DEMO]qcm_socket_send error");
+            QLOGE("[TEST DEMO]socket_write error");
             break;
         }
-
+        qosa_task_sleep_sec(1);  // Wait for server response data
         // Receive server response data, can set up own TCP server for send/receive data testing
-        ret = qcm_socket_read(sockfd, buff, SOCKET_BLOCK_BUFF_MAX_LEN);
+        qosa_memset(buff, 0, SOCKET_BLOCK_BUFF_MAX_LEN);
+        ret = socket_app_block_read(socket_fd, buff, SOCKET_BLOCK_BUFF_MAX_LEN);
         if (ret <= 0)
         {
-            QLOGE("[TEST DEMO]qcm_socket_read error");
+            QLOGE("[TEST DEMO]socket_read error");
             break;
         }
 
-        QLOGI("[TEST DEMO]ret = %d buff=%s", ret, buff);
+        QLOGI("[TEST DEMO]recv %d bytes: %s", ret, (char *)buff);
     }
 
     // Close socket connection
-    qcm_socket_close(sockfd);
+    close(socket_fd);
 }
 
 /**
@@ -200,10 +280,11 @@ void unir_test_demo_init(void)
     int         err = 0;
     qosa_task_t app_task = QOSA_NULL;
 
-    err = qosa_task_create(&app_task, SOCKET_BLOCK_DEMO_TASK_STACK_SIZE, SOCKET_BLOCK_DEMO_TASK_PRIO, "app_block", qcm_socket_app_block_process, QOSA_NULL);
+    err = qosa_task_create(&app_task, SOCKET_BLOCK_DEMO_TASK_STACK_SIZE, SOCKET_BLOCK_DEMO_TASK_PRIO, "app_block", socket_app_block_process, QOSA_NULL);
     if (err != QOSA_OK)
     {
         QLOGE("[TEST DEMO]app_task task create error");
         return;
     }
 }
+UNIRTOS_APP_EXPORT(700, "unir_sms_send_test_demo", unir_test_demo_init);

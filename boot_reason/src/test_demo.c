@@ -16,6 +16,8 @@
 #include "qosa_power.h"
 #include "qosa_log.h"
 
+#include "unirtos_app_init_registry.h"
+
 #define QOS_LOG_TAG LOG_TAG_DEMO
 static qosa_task_t          g_unir_pwrkey_demo_task = QOSA_NULL;
 
@@ -155,7 +157,7 @@ void unir_test_demo_init(void)
     QLOGV("[TEST DEMO]Enter UniRTOS Power DEMO!");
     
     // Create a power management demo task
-     if (g_unir_pwrkey_demo_task == QOSA_NULL)
+    if (g_unir_pwrkey_demo_task == QOSA_NULL)
     {
          qosa_task_create(&g_unir_pwrkey_demo_task, 
                     4096, 
@@ -166,3 +168,5 @@ void unir_test_demo_init(void)
     }
    
 }
+
+UNIRTOS_APP_EXPORT(700, "unir_boot_reason_demo", unir_test_demo_init);

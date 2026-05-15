@@ -39,15 +39,15 @@
 
 ### 添加项目到UniRTOS SDK
 
-CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏**
+CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的[快速启动栏](https://www.quectel.com.cn/unirtos/quick-start)。
 
 ### 硬件连接
 
-使用USB数据线连接开发板和电脑即可
+使用USB数据线连接开发板和电脑即可。
 
 ### 效果展示
 
-可查看media目录下的.mp4格式视频查看实际效果
+可查看media目录下的.mp4格式视频查看实际效果。
 
 
 
@@ -61,11 +61,11 @@ CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏
 
 - `unir_test_demo_init` 函数
 
-  - **功能**:程序入口，创建两个线程
+  - **功能**:程序入口，创建两个线程。
 
   - 关键操作: 
-    - 创建任务：调用`qosa_task_create` 创建task A 和task B
-    - 删除任务：调用`qosa_task_delete` 创建task A 和task B
+    - 创建任务：调用`qosa_task_create` 创建task A 和task B。
+    - 删除任务：调用`qosa_task_delete` 创建task A 和task B。
 
 ​	<img src="./media/code1.png" width="80%">
 
@@ -73,9 +73,9 @@ CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏
 
 如有其他需求，如挂起线程，终止线程等，参考如下：
 
-1. *qosa_task_suppend* : 挂起线程任务
-2. qosa_task_resume : 恢复被挂起的线程任务
-3. *qosa_task_get_current_ref* ：获取当前线程的任务句柄
-4. *qosa_task_change_priority* ：改变线程的优先级
-5. *qosa_task_get_priority* ： 获取线程的优先级
+1. *qosa_task_suppend* : 挂起线程任务。
+2. qosa_task_resume : 恢复被挂起的线程任务。
+3. *qosa_task_get_current_ref* ：获取当前线程的任务句柄。
+4. *qosa_task_change_priority* ：改变线程的优先级。
+5. *qosa_task_get_priority* ： 获取线程的优先级。
 

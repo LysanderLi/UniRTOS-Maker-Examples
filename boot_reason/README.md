@@ -39,7 +39,7 @@
 
 ### 添加项目到UniRTOS SDK
 
-CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏**
+CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的[快速启动栏](https://www.quectel.com.cn/unirtos/quick-start)。
 
 ### 硬件连接
 

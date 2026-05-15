@@ -41,18 +41,18 @@
 
 ### 添加项目到UniRTOS SDK
 
-CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动**
+CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的[快速启动栏](https://www.quectel.com.cn/unirtos/quick-start)。
 
 ### 硬件连接
 
 ​	<img src="./media/硬件连接.png" alt="img"  width="50%"/>
 
-1. 使用杜邦线连接usb-ttl模块和开发板的UART0，VCC->3V3 , GND->GND , TX-> RX0 , RX->TX0
-2. 使用USB数据线连接开发板和电脑
+1. 使用杜邦线连接usb-ttl模块和开发板的UART0，VCC->3V3 , GND->GND , TX-> RX0 , RX->TX0。
+2. 使用USB数据线连接开发板和电脑。
 
 ### 效果展示
 
-下图为串口工具发送和接收的数据
+下图为串口工具发送和接收的数据。
 
 ​	<img src="./media/串口助手.png" width="50%">
 
@@ -95,4 +95,4 @@ CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动**
 
 ### 串口工具收发数据无任何反应？
 
-检查开发板和usb-ttl模块的硬件连接，确认双方的TX是连接另一方的RX
+检查开发板和usb-ttl模块的硬件连接，确认双方的TX是连接另一方的RX。

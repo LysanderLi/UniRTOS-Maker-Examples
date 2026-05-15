@@ -17,7 +17,7 @@
 
 ## 开发准备
 
-就像“hello world”是学习编程语言的第一步，“驱动GPIO”同样是嵌入式的第一步。下面跟着步骤走，一起使用UniRTOS实现驱动GPIO
+就像“hello world”是学习编程语言的第一步，“驱动GPIO”同样是嵌入式的第一步。下面跟着步骤走，一起使用UniRTOS实现。
 
 ### 硬件清单
 
@@ -39,22 +39,22 @@
 
 ### 添加项目到UniRTOS SDK
 
-CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏**
+CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的[快速启动栏](https://www.quectel.com.cn/unirtos/quick-start)。
 
 ### 硬件连接
 
-1. LED模块连接开发板对应物理引脚，V->3V3 , R/G/B->Pin19(19号引脚)
-2. 使用USB数据线连接开发板和电脑
+1. LED模块连接开发板对应物理引脚，V->3V3 , R/G/B->Pin19(19号引脚)。
+2. 使用USB数据线连接开发板和电脑。
 
 ## 实现讲解
 
 ### 常量定义 ：
 
-1. 定义线程栈大小为1024字节，即1 kb
-2. 定义线程优先级为一般优先级
-3. 定义线程任务句柄，初始化为空
-4. 定义需要初始化的引脚号，*Demo*中使用19号引脚，如需其他引脚，请自行修改
-5. 定义一个 `pin_cfg`，用于后续接收默认引脚配置，类型为`qosa_pin_cfg_t`
+1. 定义线程栈大小为1024字节，即1 kb。
+2. 定义线程优先级为一般优先级。
+3. 定义线程任务句柄，初始化为空。
+4. 定义需要初始化的引脚号，*Demo*中使用19号引脚，如需其他引脚，请自行修改。
+5. 定义一个 `pin_cfg`，用于后续接收默认引脚配置，类型为`qosa_pin_cfg_t`。
 
 ![img](./media/code_1.png)	
 
@@ -62,30 +62,30 @@ CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏
 
 ### *unir_led_init* 函数
 
-主要功能是初始化引脚对应的GPIO功能
+主要功能是初始化引脚对应的GPIO功能。
 
-1. 使用`qosa_memset`现将`pin_cfg`中的成员初始化为0
-2. 使用`qosa_get_pin_default_cfg`获取引脚的默认配置，拿到引脚对应GPIO号，GPIO功能配置
-3. 使用`qosa_set_func`设置当前引脚功能为GPIO功能，此处的GPIO功能配置值由上一步获取
-4. 使用`qosa_gpio_init`初始化GPIO功能，配置为上拉输出模式，默认电平高电平
+1. 使用`qosa_memset`现将`pin_cfg`中的成员初始化为0。
+2. 使用`qosa_get_pin_default_cfg`获取引脚的默认配置，拿到引脚对应GPIO号，GPIO功能配置。
+3. 使用`qosa_set_func`设置当前引脚功能为GPIO功能，此处的GPIO功能配置值由上一步获取。
+4. 使用`qosa_gpio_init`初始化GPIO功能，配置为上拉输出模式，默认电平高电平。
 
 ![img](./media/code_2.png)
 
 ### *unir_led_set*函数
 
-主要功能：改变引脚的GPIO输出电平，从而实现LED的亮灭
+主要功能：改变引脚的GPIO输出电平，从而实现LED的亮灭。
 
 ![img](./media/code_3.png)
 
 ### *unir_test_demo_process* 函数
 
-主要功能：线程处理函数，主要实现LED的闪烁逻辑，每隔1s改变GPIO的输出电平
+主要功能：线程处理函数，主要实现LED的闪烁逻辑，每隔1s改变GPIO的输出电平。
 
 ​	![img](./media/code_4.png)
 
 ### *unir_test_demo_init* 函数
 
-主要功能：调用函数初始化配置GPIO，创建线程执行任务
+主要功能：调用函数初始化配置GPIO，创建线程执行任务。
 
 ​	![img](./media/code_5.png)
 
@@ -93,8 +93,8 @@ CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏
 
 ### 1. LED没有任何反应？
 
-检查连线是否正确，确认GPIO配置为输出模式，引脚配置为GPIO功能
+检查连线是否正确，确认GPIO配置为输出模式，引脚配置为GPIO功能。
 
 ### 2. 是否可以使用其他引脚？
 
-修改开头的宏定义LED_PIN_NUM即可更换为其他引脚
+修改开头的宏定义LED_PIN_NUM即可更换为其他引脚。

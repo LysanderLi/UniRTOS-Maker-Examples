@@ -22,7 +22,9 @@
 #include "qosa_ip_addr.h"
 #include "qosa_event_notify.h"
 
-#define QOS_LOG_TAG                               LOG_TAG_DEMO
+#include "unirtos_app_init_registry.h"
+
+#define QOS_LOG_TAG    LOG_TAG_DEMO
 
 /** Maximum wait time for network attachment (seconds) */
 #define DATACALL_DEMO_WAIT_ATTACH_MAX_WAIT_TIME   300
@@ -326,3 +328,5 @@ void unir_test_demo_init(void)
         return;
     }
 }
+
+UNIRTOS_APP_EXPORT(700, "unir_datacall_test_demo", unir_test_demo_init);

@@ -6,6 +6,7 @@
 **********************************************************************/
 #include "qosa_sys.h"
 #include "qosa_log.h"
+#include "unirtos_app_init_registry.h"
 
 #define QOS_LOG_TAG LOG_TAG_DEMO
 static qosa_task_t          UNIRTOS_TEST_TASK_A = QOSA_NULL, UNIRTOS_TEST_TASK_B = QOSA_NULL;
@@ -95,3 +96,5 @@ void unir_test_demo_init(void)
     }
    
 }
+
+UNIRTOS_APP_EXPORT(700, "unir_mutex_test_demo", unir_test_demo_init);

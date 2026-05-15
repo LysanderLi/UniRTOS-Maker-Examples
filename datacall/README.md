@@ -38,7 +38,7 @@
 
 #### 添加项目到UniRTOS SDK
 
-CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏**
+CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的[快速启动栏](https://www.quectel.com.cn/unirtos/quick-start)。
 
 #### 硬件连接
 
@@ -79,7 +79,7 @@ CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏
 - PDP 上下文配置：设置 APN、IP 类型（IPv4/IPv6），调用`qosa_datacall_set_pdp_context`。
 - 创建并启动拨号：`qosa_datacall_conn_new` 创建连接，qosa_datacall_start执行同步拨号。
 - 获取并打印 IP 信息：支持 IPv4/IPv6 地址解析与日志输出。
-- 无限循环监听事件：等待消息队列，处理 PDP 断开事件并自动重拨。
+- 无限循环监听事件：等待消息队列，处理PDP断开事件并自动重拨。
 - 掉线重连机制：最多重试 10 次，每次间隔 20 秒，重连成功后重新获取 IP。
 - **重要性**：完整封装蜂窝数据拨号从上线到异常恢复的全套流程，是物联网设备联网的核心逻辑。
 

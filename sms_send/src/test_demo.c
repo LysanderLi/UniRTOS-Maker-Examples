@@ -14,7 +14,7 @@
 #include "qosa_sms.h"               // SMS functions
 #include "qosa_system_utils.h"
 #include "qosa_at_config.h"
-
+#include "unirtos_app_init_registry.h"
 
 #define QOS_LOG_TAG   LOG_TAG_DEMO
 
@@ -210,3 +210,5 @@ void unir_test_demo_init(void)
         );
     }
 }
+
+UNIRTOS_APP_EXPORT(700, "unir_sms_send_test_demo", unir_test_demo_init);

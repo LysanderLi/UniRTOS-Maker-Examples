@@ -10,12 +10,10 @@
 
 #include "qosa_sys.h"
 #include "qosa_gpio.h"
-#include "qosa_dev_eigen.h"
+#include "qosa_pinctrl.h"
 #include "qosa_def.h"
 #include "qosa_log.h"
-#include <stdlib.h>
-#include <string.h>
-
+#include "unirtos_app_init_registry.h"
 
 #define QOS_LOG_TAG   LOG_TAG_DEMO
 
@@ -110,3 +108,5 @@ void unir_test_demo_init(void)
         );
     }
 }
+
+UNIRTOS_APP_EXPORT(700, "unir_led_test_demo", unir_test_demo_init);

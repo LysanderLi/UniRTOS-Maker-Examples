@@ -15,44 +15,44 @@
 
 #### 硬件要求
 
-- EG800Z-CN开发板，[点此购买开发板](https://www.quecmall.com/goods-detail/2c90800b987f06090198aca7bde100a6)
+- EG800Z-CN开发板，[点此购买开发板](https://www.quecmall.com/goods-detail/2c90800b987f06090198aca7bde100a6)。
 
 ​	<img src="./media/开发板实物图.jpg">
 
-- USB数据线（TYPE-C），[点此购买](https://detail.tmall.com/item.htm?abbucket=11&id=712043397690&mi_id=0000UuATUkl2Swill--d8ar3-R828dAfvrmApTj3VzPdxhA&ns=1&priceTId=214783fc17750971433067563e1379&skuId=5825460040081&spm=a21n57.1.hoverItem.4&utparam={"aplus_abtest"%3A"d39c694c59ac1c7b55f24ab87fd2bb30"}&xxc=taobaoSearch)
+- USB数据线（TYPE-C），[点此购买](https://detail.tmall.com/item.htm?abbucket=11&id=712043397690&mi_id=0000UuATUkl2Swill--d8ar3-R828dAfvrmApTj3VzPdxhA&ns=1&priceTId=214783fc17750971433067563e1379&skuId=5825460040081&spm=a21n57.1.hoverItem.4&utparam={"aplus_abtest"%3A"d39c694c59ac1c7b55f24ab87fd2bb30"}&xxc=taobaoSearch)。
 
 ​	<img src="./media/数据线.png">
 
-- 有效SIM卡（可发短信）
+- 有效SIM卡（可发短信）。
 
 ​	<img src="./media/SIM.png">
 
 #### 软件要求
 
-- Quectel USB驱动，[点此获取](https://www.quectel.com.cn/download/quectel_windows_usb_drivery_v1-0_cn)
+- Quectel USB驱动，[点此获取](https://www.quectel.com.cn/download/quectel_windows_usb_drivery_v1-0_cn)。
 - UniRTOS SDK，获取请联系[技术与支持](https://www.quectel.com.cn/contact?tab=t)。
-- EPAT工具：移芯平台日志调试工具，[点此获取](https://www.quectel.com.cn/download/epat日志工具)
+- EPAT工具：移芯平台日志调试工具，[点此获取](https://www.quectel.com.cn/download/epat日志工具)。
 
 ### 快速上手
 
 #### 下载项目
 
-示例代码位于本案例`src`目录下
+示例代码位于本案例`src`目录下。
 
 #### 添加项目到UniRTOS SDK
 
-CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏**
+CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的[快速启动栏](https://www.quectel.com.cn/unirtos/quick-start)。
 
 #### 硬件连接
 
 ​	<img src="./media/sms_connect.png" width="50%">
 
-1. 按卡槽丝印提示方向拨开卡槽盖，将SIM卡放入，再扣好盖子
-2. 使用数据线连接开发板和电脑
+1. 按卡槽丝印提示方向拨开卡槽盖，将SIM卡放入，再扣好盖子。
+2. 使用数据线连接开发板和电脑。
 
 #### 效果展示
 
-下图为手机收到开发板发来的短信
+下图为手机收到开发板发来的短信。
 
 ​	<img src="./media/手机短信.png" width="30%">
 
@@ -101,4 +101,4 @@ CSDK新增Demo，固件编译和烧录请参考UniRTOS板块的**快速启动栏
 
 #### 程序一直等待网络连接？
 
-确认使用的SIM卡能够注网且正确安装
+确认使用的SIM卡能够注网且正确安装。

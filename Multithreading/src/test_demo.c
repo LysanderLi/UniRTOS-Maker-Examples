@@ -10,7 +10,7 @@
 #include "qosa_def.h"
 #include "qosa_log.h"
 #include <stdio.h>
-
+#include "unirtos_app_init_registry.h"
 /*===========================================================================
  *  Macro Definition
  ===========================================================================*/
@@ -44,7 +44,7 @@ void task_B_handler(void *argv)
     }
 }
 
-int unir_test_demo_init(void)
+void unir_test_demo_init(void)
 {
     qosa_int32_t status;
     int ret;
@@ -81,6 +81,6 @@ int unir_test_demo_init(void)
             QLOGI("[TEST Demo] Task B deleted successfully");
         }
     }
-    return 0;
 }
 
+UNIRTOS_APP_EXPORT(700, "unir_multithreading_test_demo", unir_test_demo_init);
