@@ -1,112 +1,226 @@
-# 【EG800Z-CN】发送短信示例
+# [EG800Z-CN] SMS Sending Example
 
-### 项目概述
+## Project Overview
 
-这是一个基础的SMS协议应用，本案例使用移远通信EG800Z-CN开发板和UniRTOS，通过调用UniRTOS中SMS相关功能函数，让开发板能向其他SIM卡发送短信，实现远程通知功能。
+This is a basic SMS protocol example. It uses the Quectel EG800Z-CN development board and UniRTOS SMS APIs, allowing the board to send SMS messages to other SIM cards for remote notification.
 
-### 功能特性
+## Features
 
-**远程短信告警**
+**Remote SMS alerting**
 
-- **精准消息投递**：可将预设的告警或通知信息，以短信形式精准发送至指定手机号码。
-- **多场景触发支持**：可集成于各类事件处理流程中（如异常检测、定时任务、用户指令），作为关键信息的远程通知出口。
+- **Accurate message delivery**: Sends predefined alerts/notifications to target phone numbers via SMS.
+- **Multi-scenario trigger support**: Can be integrated into event flows such as anomaly detection, scheduled jobs, or user commands.
 
-### 开发准备
+## Development Preparation
 
-#### 硬件要求
+### Hardware Requirements
 
-- EG800Z-CN开发板，[点此购买开发板](https://www.quecmall.com/goods-detail/2c90800b987f06090198aca7bde100a6)。
+- EG800Z-CN development board, [Buy the board here](https://www.quecmall.com/goods-detail/2c90800b987f06090198aca7bde100a6).
 
-​	<img src="./media/开发板实物图.jpg">
+  <img src="./media/开发板实物图.jpg">
 
-- USB数据线（TYPE-C），[点此购买](https://detail.tmall.com/item.htm?abbucket=11&id=712043397690&mi_id=0000UuATUkl2Swill--d8ar3-R828dAfvrmApTj3VzPdxhA&ns=1&priceTId=214783fc17750971433067563e1379&skuId=5825460040081&spm=a21n57.1.hoverItem.4&utparam={"aplus_abtest"%3A"d39c694c59ac1c7b55f24ab87fd2bb30"}&xxc=taobaoSearch)。
+- USB data cable (Type-C), [Buy here](https://detail.tmall.com/item.htm?abbucket=11&id=712043397690&mi_id=0000UuATUkl2Swill--d8ar3-R828dAfvrmApTj3VzPdxhA&ns=1&priceTId=214783fc17750971433067563e1379&skuId=5825460040081&spm=a21n57.1.hoverItem.4&utparam={"aplus_abtest"%3A"d39c694c59ac1c7b55f24ab87fd2bb30"}&xxc=taobaoSearch).
 
-​	<img src="./media/数据线.png">
+  <img src="./media/数据线.png">
 
-- 有效SIM卡（可发短信）。
+- Valid SIM card (SMS-capable).
 
-​	<img src="./media/SIM.png">
+  <img src="./media/SIM.png">
 
-### 软件要求
+## Quick Start
 
-| **软件名称**          | **描述**                                                     | **获取链接**                                                 |
-| --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| unirtos-toolchain.exe | 编译工具链安装程序                                           | [点此获取](https://www.quectel.com.cn/download/unirtos-交叉编译工具链) |
-| Python                | 用于运行unirtos-cli工具，需使用3.9及更高版本。               | [快速启动](https://www.quectel.com.cn/unirtos/quick-start)-环境搭建章节 |
-| Git                   | unirtos-cli使用该工具拉取SDK、依赖库等，需使用2.20及更高版本。 | [快速启动](https://www.quectel.com.cn/unirtos/quick-start)-环境搭建章节 |
-| unirtos-cli           | UniRTOS的命令行工具，用于一键拉取SDK、快速创建工程。         | [快速启动](https://www.quectel.com.cn/unirtos/quick-start)-环境搭建章节 |
-| Quectel USB驱动       | 用于PC识别模块的USB枚举接口，根据模组所属平台选择，当前链接供移芯平台模组使用。 | [点此获取](https://www.quectel.com.cn/download/quectel_windows_usb_drivery_v1-0_cn) |
-| QFlash.exe            | 模块固件烧录程序，用于烧录UniRTOS编译生成的固件              | [点此获取](https://www.quectel.com.cn/download/qflash_v7-9_cn) |
-| EPAT                  | 移芯平台日志调试工具                                         | [点此获取](https://www.quectel.com.cn/download/epat日志工具) |
+### 1. Set up the development environment
 
+Refer to [UNIRTOS Quick Start](https://docs.quectel.com/zh/UniRTOS/UniRTOS文档/快速上手/快速上手.html).
 
+### 2. Project structure
 
-## 快速上手
+```text
+sms_send/
+├── main
+  ├── inc               # Project header files
+    └── sms.h           # Demo header
+  └── src               # Project source files
+    └── sms.c           # Demo source code
+├── media               # Media files used by README
+├── menucongfig         # Feature options for project config
+├── CMakeLists.txt      # Demo build script
+├── env_config.json     # UniRTOS environment configuration
+└── README.md           # This file
+```
 
-#### 修改源码参数
+### 3. Get the code
 
-修改源码当中接收短信的电话号码。修改点位于sms_send/main/sms.c中，修改宏定义TARGET_PHONE_NUMBER的值即可。
+```bash
+# Clone the example repository
+unirtos-cli new -r unirtos-maker-examples
+# Enter this project
+cd unirtos-maker-examples/sms_send
+```
 
-#### 编译并烧录项目
+### 4. Build the project
 
-确保unirtos-cli工具和unirtos-toolchain工具已安装，下载本项目并在在下载的项目目录开启Cmd或PowerShell窗口，执行命令`unirtos-cli env-setup`拉取编译环境，再执行命令`unirtos-cli build`进行编译。项目配置中默认编译型号为EG800ZCN_LA，如若使用的模组型号不是EG800ZCN_LA，可通过项目中`env_config.json`文件的`build`字段进行修改，详细编译与烧录流程请参考[快速启动](https://www.quectel.com.cn/unirtos/quick-start)。
+```bash
+unirtos-cli env-setup
+```
 
-#### 硬件连接
+```bash
+unirtos-cli build -m EG800ZCN_LA -v EG800ZCNLAR01A01_OCPU_20260626
+```
 
-​	<img src="./media/sms_connect.png" width="50%">
+```text
+SUCCESS: Unirtos project built successfully!
+```
 
-1. 按卡槽丝印提示方向拨开卡槽盖，将SIM卡放入，再扣好盖子。
-2. 使用数据线连接开发板和电脑。
+### 5. Modify source parameters
 
-#### 效果展示
+Before building, modify the target SMS phone number in source code. In `sms_send/main/src/sms.c`, change macro `TARGET_PHONE_NUMBER` to the actual receiver number.
 
-下图为手机收到开发板发来的短信。
+### 6. Hardware connection
 
-​	<img src="./media/手机短信.png" width="30%">
+<img src="./media/sms_connect.png" width="50%">
 
-### 代码概览
+1. Open the SIM slot cover according to the printed direction, insert the SIM card, then close the cover.
+2. Connect the board to your PC with a USB cable.
 
-#### 示例流程图
+### 7. Log output
 
-​	<img src="./media/SMS创客流程图.png" width="20%">
+```text
+[SMS DEMO]Send SMS to 135xxxxxxxx
+[SMS DEMO] running... count:1
+[SMS DEMO]Send SMS success, MR:1
+```
 
-#### 主要功能接口
+The target phone will receive the SMS:
 
-##### unir_test_demo_init
+<img src="./media/手机短信.png" width="30%">
 
-**功能**：短信发送 Demo 入口与初始化函数。负责创建独立任务，让短信发送逻辑在后台运行，不阻塞主程序。
+## Code Overview
 
-**关键操作**：
+### Main Interfaces
 
-- 任务创建：调用 **qosa_task_create** 创建名为test demo的任务，执行unir_test_demo_process主逻辑。
-- 任务参数：配置栈大小 4096、普通优先级，确保短信任务稳定运行。
-- **重要性**：用户应用初始化时必须调用，用于启动整个短信发送功能。
+#### *unir_sms_demo_init* - Entry and initialization function
 
-##### unir_test_demo_process
+- **Function**: Entry point of the SMS demo. Creates and starts a dedicated task so SMS sending runs in the background.
+- Key operations:
+  - **Task creation**: Calls `qosa_task_create` to create `sms_demo`, which runs `unir_sms_demo_process`.
+  - **Task config**: 4 KB stack, normal priority.
+- **Importance**: Call this function in app initialization to start SMS sending.
 
-**功能**：短信发送 Demo 主处理函数。在无限循环中按固定周期执行短信发送，是业务逻辑的核心入口。
-**关键操作**：
+```c
+void unir_sms_demo_init(void)
+{
+    QLOGV("enter SMS DEMO !!!");
+    if (sms_demo_task == QOSA_NULL)
+    {
+        qosa_task_create(
+            &sms_demo_task,
+            UniRTOS_TEST_DEMO_TASK_STACK_SIZE,
+            UniRTOS_TEST_DEMO_TASK_PRIO,
+            "sms_demo",
+            unir_sms_demo_process,
+            QOSA_NULL
+        );
+    }
+}
+```
 
-- 周期控制：延时计数，**每 60 秒触发一次短信发送**。
-- 调用发送：执行qosa_sms_demo_send_all_characters_sms向目标号码发送中英混合短信。
-- 状态打印：输出运行日志，标记发送成功 / 失败状态。
-- 循环执行：持续运行，支持周期性自动重发。
-- **重要性**：封装定时发送逻辑。
+#### *unir_sms_demo_process* - Main SMS handler
 
-##### qosa_sms_demo_send_all_characters_sms
+- **Function**: Core logic for periodic SMS sending.
+- Key operations:
+  - **Period control**: Uses counter `count` (up to 10 sends), with `qosa_task_sleep_sec(60)` between sends.
+  - **Send interface**: Calls `unir_sms_demo_send_all_characters_sms` to send mixed Chinese/English text.
+  - **Status logs**: Prints send success/failure logs.
+- **Importance**: Encapsulates periodic send logic and is easy to customize.
 
-**功能**：中英混合短信发送核心接口。完成网络附着、编码转换、PDU 封装、异步发送全流程。
-**关键操作**：
+```c
+static void unir_sms_demo_process(void *ctx)
+{
+    int count = 0;
+    int ret = 0;
+    while (1)
+    {
+        count++;
+        if (count > 10) { break; }
+        QLOGV("[SMS DEMO]Send SMS to " TARGET_PHONE_NUMBER);
+        ret = unir_sms_demo_send_all_characters_sms(TARGET_PHONE_NUMBER, SEND_TEXT_MESSAGE);
+        if (ret != 0) { QLOGI("[SMS DEMO]Failed to send SMS"); }
+        qosa_task_sleep_sec(60);
+    }
+}
+```
 
-- 网络等待：调用qosa_datacall_wait_attached等待网络注册成功，超时 300s。
-- 编码转换：将 UTF-8 中英文内容转为 **UCS2 编码**，支持中文正常发送。
-- PDU 封装：调用qosa_sms_text_to_pdu把文本转为短信 PDU 格式。
-- 异步发送：通过 qosa_sms_send_pdu_async发送短信，绑定结果回调。
-- 资源释放：自动释放内存，避免泄漏。
-- **重要性**：底层核心发送接口，支持中英文混合短信，可直接在项目中复用。
+#### *unir_sms_demo_send_all_characters_sms* - Core mixed-language SMS sender
 
-### 常见问题
+- **Function**: Core API for mixed Chinese/English SMS sending. Handles full flow: network attach, encoding conversion, PDU packaging, and async sending.
+- Key operations:
+  - Wait for network attach with `qosa_datacall_wait_attached` (300s timeout).
+  - Convert UTF-8 to UCS2 via `qosa_sms_utf8_to_ucs2` for Chinese text support.
+  - Fill SMS structure fields (message type, destination number, charset, DCS).
+  - Convert text to PDU with `qosa_sms_text_to_pdu`.
+  - Send asynchronously via `qosa_sms_send_pdu_async` with callback `unir_sms_demo_send_msg_rsp`.
+  - Free allocated memory via `qosa_free`.
+- **Importance**: Reusable low-level send interface for mixed-language SMS.
 
-#### 程序一直等待网络连接？
+```c
+static int unir_sms_demo_send_all_characters_sms(const char *phone_number, const char *message_txt)
+{
+    // 1. Wait for network attach (300s timeout)
+    is_attached = qosa_datacall_wait_attached(qosa_sms_simid, QOSA_SMS_DEMO_WAIT_ATTACH_TIMEOUT);
+    if (!is_attached) { return -1; }
 
-确认使用的SIM卡能够注网且正确安装。
+    // 2. UTF-8 to UCS2 conversion (supports Chinese)
+    max_hex_size = (qosa_strlen(message_txt) * 4) + 1;
+    message_ucs2_string = (char *)qosa_malloc(max_hex_size);
+    qosa_sms_utf8_to_ucs2(message_txt, message_ucs2_string, max_hex_size);
+
+    // 3. Fill SMS message structure
+    message.msg_type = QOSA_SMS_SUBMIT;
+    qosa_strcpy(message.text.send.da, (const char *)phone_number);
+    message.text.send.toda = 129;
+    qosa_strcpy((char *)message.text.send.data, (const char *)message_ucs2_string);
+    message.text.send.data_chset = QOSA_CS_UCS2;
+    message.text.send.dcs = 0x08;  // UCS2 encoding
+
+    // 4. Convert text to PDU
+    qosa_sms_text_to_pdu(&message, &record);
+
+    // 5. Send PDU asynchronously with callback
+    qosa_sms_send_pdu_async(qosa_sms_simid, &send_param, unir_sms_demo_send_msg_rsp, pdu_with_sca);
+
+    // 6. Free resources
+    qosa_free(message_ucs2_string);
+    return (QOSA_SMS_SUCCESS == qosa_err) ? 0 : -1;
+}
+```
+
+#### *unir_sms_demo_send_msg_rsp* - SMS send result callback
+
+- **Function**: Asynchronous callback for SMS send result.
+- Key operations:
+  - Parse `err_code` and `mr` from `qosa_sms_send_pdu_cnf_t`.
+  - Print success (`Send SMS success, MR:xxx`) or failure logs.
+- **Importance**: Provides send status feedback to upper layers.
+
+```c
+static void unir_sms_demo_send_msg_rsp(void *ctx, void *argv)
+{
+    qosa_sms_send_pdu_cnf_t *cnf = argv;
+    QLOGI("[SMS DEMO]result sim:%d err:0x%x", qosa_sms_simid, cnf->err_code);
+    if (QOSA_SMS_SUCCESS != cnf->err_code)
+    {
+        QLOGI("[SMS DEMO]Send SMS failed with error:%d", cnf->err_code);
+    }
+    else
+    {
+        QLOGI("[SMS DEMO]Send SMS success, MR:%u", cnf->mr);
+    }
+}
+```
+
+## FAQ
+
+### The program keeps waiting for network registration?
+
+Make sure the SIM card can attach to the network and is installed correctly.

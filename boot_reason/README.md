@@ -1,81 +1,172 @@
-# 【EG800Z-CN】模块重启，如何获取开机原因？
+# [EG800Z-CN] How to Get the Boot Reason After Module Restart
 
-## 项目概述
+## Project Overview
 
-这是一个获取模组开机原因的简单示例，在程序开发工程中难免会遇到模组重启，这时候通过获取开机原因，以便判断异常重启的原因，这对调试程序异常十分有利。本案例使用移远通信EG800Z-CN开发板和UniRTOS，通过EPAT日志查看开机原因。
+This is a simple example that shows how to obtain the module boot reason. During development, module restarts may happen occasionally. By checking the boot reason, you can quickly identify why an abnormal restart occurred, which is very helpful for debugging. This example uses the Quectel EG800Z-CN development board and UniRTOS, and displays the boot reason through EPAT logs.
 
+## Features
 
+**Accurate boot root-cause tracing based on dedicated APIs**
 
-## 功能特性
+- **Real-time boot reason identification**: Calls a low-level API immediately after startup to retrieve and parse the current power-on cause.
+- **Comprehensive reason coverage**: Supports multiple trigger sources, including but not limited to Power-On and Soft Reset.
+- **Efficient one-time query**: A single function call retrieves the result, with no continuous polling and very low resource usage.
 
-**基于专用API的精准开机溯源**
+## Development Preparation
 
-- **实时开机原因识别**：程序启动后立即调用底层功能函数，精准获取并解析本次系统上电的原因。
-- **全面原因覆盖**：支持识别多种开机触发源，包括但不限于：主电源上电（Power-On）、软件指令重启（Soft Reset）等。
-- **单次高效查询**：仅需一次函数调用即可完成原因获取，无需持续轮询，资源消耗极低。
+### Hardware Requirements
 
+- EG800Z-CN development board, [Buy the board here](https://www.quecmall.com/goods-detail/2c90800b987f06090198aca7bde100a6).
 
+  <img src="./media/开发板实物图.jpg">
 
-## 开发准备
+- USB data cable (Type-C), [Buy here](https://detail.tmall.com/item.htm?abbucket=11&id=712043397690&mi_id=0000UuATUkl2Swill--d8ar3-R828dAfvrmApTj3VzPdxhA&ns=1&priceTId=214783fc17750971433067563e1379&skuId=5825460040081&spm=a21n57.1.hoverItem.4&utparam={"aplus_abtest"%3A"d39c694c59ac1c7b55f24ab87fd2bb30"}&xxc=taobaoSearch).
 
-### 硬件要求
+  <img src="./media/数据线.png">
 
-| **硬件名称**    | **数量** | **实物图**                                             | **获取链接**                                                 |
-| --------------- | -------- | ------------------------------------------------------ | ------------------------------------------------------------ |
-| EG800Z-CN开发板 | 1        | <img src="./media/开发板实物图.jpg" width="50%">       | [点此获取](https://www.quecmall.com/goods-detail/2c90800b987f06090198aca7bde100a6) |
-| USB数据线       | 1        | <img src="./media/数据线.png" alt="img"  width="50%"/> | [点此获取](https://detail.tmall.com/item.htm?abbucket=11&id=712043397690&mi_id=0000UuATUkl2Swill--d8ar3-R828dAfvrmApTj3VzPdxhA&ns=1&priceTId=214783fc17750971433067563e1379&skuId=5825460040081&spm=a21n57.1.hoverItem.4&utparam={"aplus_abtest"%3A"d39c694c59ac1c7b55f24ab87fd2bb30"}&xxc=taobaoSearch) |
+## Quick Start
 
-### 软件要求
+### 1. Set up the development environment
 
-| **软件名称**          | **描述**                                                     | **获取链接**                                                 |
-| --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| unirtos-toolchain.exe | 编译工具链安装程序                                           | [点此获取](https://www.quectel.com.cn/download/unirtos-交叉编译工具链) |
-| Python                | 用于运行unirtos-cli工具，需使用3.9及更高版本。               | [快速启动](https://www.quectel.com.cn/unirtos/quick-start)-环境搭建章节 |
-| Git                   | unirtos-cli使用该工具拉取SDK、依赖库等，需使用2.20及更高版本。 | [快速启动](https://www.quectel.com.cn/unirtos/quick-start)-环境搭建章节 |
-| unirtos-cli           | UniRTOS的命令行工具，用于一键拉取SDK、快速创建工程。         | [快速启动](https://www.quectel.com.cn/unirtos/quick-start)-环境搭建章节 |
-| Quectel USB驱动       | 用于PC识别模块的USB枚举接口，根据模组所属平台选择，当前链接供移芯平台模组使用。 | [点此获取](https://www.quectel.com.cn/download/quectel_windows_usb_drivery_v1-0_cn) |
-| QFlash.exe            | 模块固件烧录程序，用于烧录UniRTOS编译生成的固件              | [点此获取](https://www.quectel.com.cn/download/qflash_v7-9_cn) |
-| EPAT                  | 移芯平台日志调试工具                                         | [点此获取](https://www.quectel.com.cn/download/epat日志工具) |
+Refer to [UNIRTOS Quick Start](https://docs.quectel.com/zh/UniRTOS/UniRTOS文档/快速上手/快速上手.html) to learn how to set up the environment and complete the basic workflow.
 
+### 2. Project structure
 
+```text
+boot_reason/
+├── main
+  ├── inc               # Project header files
+    └── boot_reason.h   # Demo header
+  └── src               # Project source files
+    └── boot_reason.c   # Demo source code
+├── media               # Media files used by README
+├── menucongfig         # Feature options for project config
+├── CMakeLists.txt      # Demo build script
+├── env_config.json     # UniRTOS environment configuration
+└── README.md           # This file
+```
 
-## 快速上手
+### 3. Get the code
 
-#### 编译并烧录项目
+Open a new PowerShell window and run:
 
-确保unirtos-cli工具和unirtos-toolchain工具已安装，下载本项目并在在下载的项目目录开启Cmd或PowerShell窗口，执行命令`unirtos-cli env-setup`拉取编译环境，再执行命令`unirtos-cli build`进行编译。项目配置中默认编译型号为EG800ZCN_LA，如若使用的模组型号不是EG800ZCN_LA，可通过项目中`env_config.json`文件的`build`字段进行修改，详细编译与烧录流程请参考[快速启动](https://www.quectel.com.cn/unirtos/quick-start)。
+```bash
+# Clone the example repository
+unirtos-cli new -r unirtos-maker-examples
+# Enter this project
+cd unirtos-maker-examples/boot_reason
+```
 
-### 硬件连接
+### 4. Build the project
 
-使用USB数据线连接开发板和电脑即可。
+Fetch the build environment:
 
-### 日志展示
+```bash
+unirtos-cli env-setup
+```
 
-![img](https://fat.quectel.com.cn/wp-content/uploads/2026/04/LOG.png)
+Run the firmware build command in PowerShell (if your module is not `EG800ZCN_LA`, replace it with your actual module model):
 
+```bash
+unirtos-cli build -m EG800ZCN_LA -v EG800ZCNLAR01A01_OCPU_20260626
+```
 
+After build completes, PowerShell shows:
 
-## 代码概览
+```text
+SUCCESS: Unirtos project built successfully!
+```
 
-### 主要功能接口
+### 5. Log output
 
-#### *unir_test_demo_init -* 入口与初始化函数
+After flashing and booting, logs will look similar to:
 
-- **功能**: 这是整个 UART 演示功能的**入口点**。它的主要职责是创建并启动一个独立的任务（线程），让具体逻辑在后台运行，而不阻塞主程序。
-- 关键操作:
-  - **任务创建**: 调用`qosa_task_create`来创建一个名为 `uart_demo` 的新任务。这个新任务将执行`unir_pwrkey_demo_boot_cause`函数。
-- **重要性**: 这是用户需要在自己的应用初始化流程中调用的函数，以启动 UART 功能。
+```text
+[boot_reason]Enter UniRTOS Power DEMO!
+[boot_reason]Boot from power key
+```
 
-#### *unir_pwrkey_demo_boot_cause* -获取开机原因并输出日志
+## Code Overview
 
-- **功能**:获取开机原因，根据结果打印信息。
+### Main Interfaces
 
-- 关键操作: 
-  - 获取原因：调用`qosa_power_get_boot_cause`，得到开机原因返回值
-  - 日志打印：根据返回值，选择对应的结果，输出日志
+#### *unir_pwrkey_demo_init* - Entry and initialization function
 
-## 常见问题
+- **Function**: Entry point of the whole demo. It creates and starts a dedicated task (thread), so the actual logic runs in the background without blocking the main flow.
+- Key operation:
+  - **Task creation**: Calls `qosa_task_create` to create a new task named `power_demo`. The task runs `unir_pwrkey_demo_process`.
+- **Importance**: This is the function users should call in their own application initialization flow to start the power demo.
 
-### 程序一直在自己重启？
+```c
+void unir_pwrkey_demo_init(void)
+{
+    QLOGV("[boot_reason]Enter UniRTOS Power DEMO!");
+    
+    // Create a power management demo task
+    if (g_unir_pwrkey_demo_task == QOSA_NULL)
+    {
+         qosa_task_create(&g_unir_pwrkey_demo_task, 
+                    4096, 
+                    QOSA_PRIORITY_NORMAL, 
+                    "power_demo", 
+                    unir_pwrkey_demo_process, 
+                    QOSA_NULL);
+    }
+   
+}
+```
 
-这是由于`unir_pwrkey_demo_process`中的自动重启函数导致的。请根据测试需求自行选择是否使用，如无需使用，请将其注释掉。
+#### *unir_pwrkey_demo_boot_cause* - Retrieve boot reason and print logs
+
+- **Function**: Retrieves the boot cause and prints logs based on the result.
+- Key operations:
+  - Get cause: Calls `qosa_power_get_boot_cause`.
+  - Print logs: Selects and prints corresponding information according to the returned cause.
+
+```c
+static void unir_pwrkey_demo_boot_cause(void)
+{
+    qosa_power_error_e ret;
+    qosa_boot_cause_e boot_cause;
+
+    // Get the boot reason
+    ret = qosa_power_get_boot_cause(&boot_cause);
+    if (ret == QOSA_POWER_SUCCESS)
+    {
+        switch (boot_cause)
+        {
+            case QOSA_BOOT_CAUSE_PSM_WAKE:
+                QLOGV("[boot_reason]Boot from PSM wake");
+                break;
+            case QOSA_BOOT_CAUSE_PWRKEY:
+                QLOGV("[boot_reason]Boot from power key");
+                break;
+            case QOSA_BOOT_CAUSE_RESET:
+                QLOGV("[boot_reason]Boot from reset key");
+                break;
+            case QOSA_BOOT_CAUSE_WDG:
+                QLOGV("[boot_reason]Boot from watchdog reset");
+                break;
+            case QOSA_BOOT_CAUSE_PANIC:
+                QLOGV("[boot_reason]Boot from panic reset");
+                break;
+            case QOSA_BOOT_CAUSE_SWRESET:
+                QLOGV("[boot_reason]Boot from software reset");
+                break;
+            default:
+                QLOGV("[boot_reason]Boot from unknown cause");
+                break;          
+        }
+    }
+    else
+    {
+        QLOGE("[boot_reason]Get boot cause failed, ret: %d", ret);
+    }
+}
+```
+
+## FAQ
+
+### The program keeps restarting by itself?
+
+This is caused by an auto-restart function in `unir_pwrkey_demo_process`. Enable or disable it based on your test needs. If not needed, comment it out.
